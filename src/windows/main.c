@@ -22,7 +22,12 @@ HWND g_hwndStatusBar;
 
 #define IDC_STATUSBAR 1001
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lparam);
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+void onDestroy(HWND hwnd);
+BOOL onCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct);
+void onSize(HWND hwnd, UINT state, int cx, int cy);
+void onPaint(HWND hwnd);
+void onCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 BOOL uiCreateStatusBar (HWND hwndParent);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -71,76 +76,88 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     return 0;
 }
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lparam)
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg) {
-        case WM_DESTROY:
-            PostQuitMessage(0);
-            return 0;
+        HANDLE_MSG(hwnd, WM_DESTROY, onDestroy);
+        HANDLE_MSG(hwnd, WM_CREATE, onCreate);
+        HANDLE_MSG(hwnd, WM_SIZE, onSize);
+        HANDLE_MSG(hwnd, WM_PAINT, onPaint);
+        HANDLE_MSG(hwnd, WM_COMMAND, onCommand);
+        default:
+            return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    }
+}
 
-        case WM_CREATE:
-            uiCreateStatusBar(hwnd);
+void onDestroy(HWND hwnd)
+{
+    PostQuitMessage(0);
+    return;
+}
+
+BOOL onCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
+{
+    return uiCreateStatusBar(hwnd);
+}
+
+void onSize(HWND hwnd, UINT state, int cx, int cy)
+{
+    SendMessage(g_hwndStatusBar, WM_SIZE, 0, 0);
+}
+
+void onPaint(HWND hwnd)
+{
+    PAINTSTRUCT ps;
+    HDC hdc = BeginPaint(hwnd, &ps);
+
+    FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+
+    EndPaint(hwnd, &ps);
+}
+
+void onCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
+{
+    switch (id) {
+        case ID_FILE_NEW:
             break;
 
-        case WM_SIZE:
-            SendMessage(g_hwndStatusBar, WM_SIZE, 0, 0);
-            return 0;
+        case ID_FILE_OPEN: {
+            OPENFILENAME ofn;
+            char fileName[260];
+            HANDLE fileHandle;
 
-        case WM_PAINT: {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hwnd, &ps);
+            ZeroMemory(&ofn, sizeof(ofn));
+            ofn.lStructSize     = sizeof(ofn);
+            ofn.hwndOwner       = hwnd;
+            ofn.lpstrFile       = fileName;
+            ofn.lpstrFile[0]    = '\0';
+            ofn.nMaxFile        = sizeof(fileName);
+            ofn.lpstrFilter     = L"Database (*.db)\0*.DB\0All Files (*.*)\0*.*\0";
+            ofn.nFilterIndex    = 1;
+            ofn.lpstrFileTitle  = NULL;
+            ofn.nMaxFileTitle   = 0;
+            ofn.lpstrInitialDir = NULL;
+            ofn.Flags           = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
-            FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-
-            EndPaint(hwnd, &ps);
-
+            if (GetOpenFileName(&ofn) == TRUE) {
+                fileHandle = CreateFile(
+                    ofn.lpstrFile,
+                    GENERIC_READ,
+                    0,
+                    (LPSECURITY_ATTRIBUTES) NULL,
+                    OPEN_EXISTING,
+                    FILE_ATTRIBUTE_NORMAL,
+                    (HANDLE) NULL);
+            }
             break;
         }
 
-        case WM_COMMAND:
-            switch (LOWORD(wParam)) {
-                case ID_FILE_NEW:
-                    break;
+        case ID_FILE_EXIT:
+            PostMessage(hwnd, WM_CLOSE, 0, 0 );
+            break;
 
-                case ID_FILE_OPEN: {
-                    OPENFILENAME ofn;
-                    char fileName[260];
-                    HANDLE fileHandle;
-
-                    ZeroMemory(&ofn, sizeof(ofn));
-                    ofn.lStructSize     = sizeof(ofn);
-                    ofn.hwndOwner       = hwnd;
-                    ofn.lpstrFile       = fileName;
-                    ofn.lpstrFile[0]    = '\0';
-                    ofn.nMaxFile        = sizeof(fileName);
-                    ofn.lpstrFilter     = L"Database (*.db)\0*.DB\0All Files (*.*)\0*.*\0";
-                    ofn.nFilterIndex    = 1;
-                    ofn.lpstrFileTitle  = NULL;
-                    ofn.nMaxFileTitle   = 0;
-                    ofn.lpstrInitialDir = NULL;
-                    ofn.Flags           = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-                    if (GetOpenFileName(&ofn) == TRUE) {
-                        fileHandle = CreateFile(
-                            ofn.lpstrFile,
-                            GENERIC_READ,
-                            0,
-                            (LPSECURITY_ATTRIBUTES) NULL,
-                            OPEN_EXISTING,
-                            FILE_ATTRIBUTE_NORMAL,
-                            (HANDLE) NULL);
-                    }
-                    break;
-                }
-
-                case ID_FILE_EXIT:
-                    PostMessage(hwnd, WM_CLOSE, 0, 0 );
-                    break;
-
-                break;
-            }
+        break;
     }
-    return DefWindowProc(hwnd, uMsg, wParam, lparam);
 }
 
 BOOL uiCreateStatusBar (HWND hwndParent)
