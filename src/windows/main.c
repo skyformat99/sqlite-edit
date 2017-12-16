@@ -37,14 +37,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 BOOL initApplication(HINSTANCE hInstance)
 {
-    WNDCLASS wc = {0}; //Ex version?
+    WNDCLASSEX wcex = {0};
 
-    wc.lpfnWndProc   = WindowProc;
-    wc.hInstance     = hInstance;
-    wc.lpszClassName = CLASS_NAME;
-    wc.lpszMenuName  = MAKEINTRESOURCE(IDR_MENU);
+    wcex.cbSize        = sizeof(WNDCLASSEX);
+    wcex.lpfnWndProc   = WindowProc;
+    wcex.hInstance     = hInstance;
+    wcex.lpszClassName = CLASS_NAME;
+    wcex.lpszMenuName  = MAKEINTRESOURCE(IDR_MENU);
 
-    return RegisterClass(&wc); //Ex version?
+    return RegisterClassEx(&wcex);
 }
 
 BOOL initInstance(HINSTANCE hInstance, int nCmdShow)
