@@ -78,6 +78,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg) {
         HANDLE_MSG(hwnd, WM_DESTROY, onDestroy);
+        HANDLE_MSG(hwnd, WM_NCDESTROY, onNCDestroy);
         HANDLE_MSG(hwnd, WM_CREATE, onCreate);
         HANDLE_MSG(hwnd, WM_SIZE, onSize);
         HANDLE_MSG(hwnd, WM_PAINT, onPaint);
@@ -92,6 +93,15 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 void onDestroy(HWND hwnd)
 {
     PostQuitMessage(0);
+}
+
+void onNCDestroy(HWND hwnd)
+{
+    LONG_PTR handles;
+
+    handles = GetWindowLongPtr(hwnd, GWLP_USERDATA);
+    VirtualFree(handles, 0, MEM_RELEASE);
+    SetWindowLongPtr(hwnd, GWLP_USERDATA, 0);
 }
 
 BOOL onCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
