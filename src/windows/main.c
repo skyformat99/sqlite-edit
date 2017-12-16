@@ -12,8 +12,10 @@
 #include <sqlite3.h>
 
 const wchar_t CLASS_NAME[] = L"DBEd";
-HINSTANCE g_hInst;
-HWND g_hwndStatusBar;
+
+struct windowHandles {
+    HWND hwndStatusBar;
+};
 
 #define IDC_STATUSBAR 1001
 
@@ -63,8 +65,6 @@ BOOL initApplication(HINSTANCE hInstance)
 
 BOOL initInstance(HINSTANCE hInstance, int nCmdShow)
 {
-    g_hInst = hInstance;
-
     HWND hwnd = CreateWindowEx(
         0,
         CLASS_NAME,
@@ -100,31 +100,46 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         default:
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
+
+    return 0;
 }
 
 void onDestroy(HWND hwnd)
 {
     PostQuitMessage(0);
-    return;
 }
 
 BOOL onCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 {
-    return uiCreateStatusBar(hwnd);
+    struct windowHandles *handles;
+
+    handles = VirtualAlloc(NULL, sizeof(struct windowHandles), MEM_COMMIT, PAGE_READWRITE);
+    if (!handles) {
+        return FALSE;
+    }
+    SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)handles);
+
+    if (!uiCreateStatusBar(hwnd)) {
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 void onSize(HWND hwnd, UINT state, int cx, int cy)
 {
-    SendMessage(g_hwndStatusBar, WM_SIZE, 0, 0);
+    struct windowHandles *handles;
+
+    handles = (struct windowHandles *)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+    SendMessage(handles->hwndStatusBar, WM_SIZE, 0, 0);
 }
 
 void onPaint(HWND hwnd)
 {
     PAINTSTRUCT ps;
-    HDC hdc = BeginPaint(hwnd, &ps);
+    HDC         hdc;
 
-    FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-
+    hdc = BeginPaint(hwnd, &ps);
     EndPaint(hwnd, &ps);
 }
 
@@ -178,6 +193,9 @@ void fileOpen(HWND hwnd)
 BOOL uiCreateStatusBar (HWND hwndParent)
 {
     INITCOMMONCONTROLSEX iccx;
+    HINSTANCE            hInstance;
+    HWND                 hwndStatusBar;
+    struct windowHandles *handles;
 
     iccx.dwSize = sizeof(INITCOMMONCONTROLSEX);
     iccx.dwICC = ICC_BAR_CLASSES;
@@ -185,7 +203,9 @@ BOOL uiCreateStatusBar (HWND hwndParent)
         return FALSE;
     }
 
-    g_hwndStatusBar = CreateWindowEx(
+    hInstance = GetWindowInstance(hwndParent);
+
+    hwndStatusBar = CreateWindowEx(
         0,
         STATUSCLASSNAME,
         (PCTSTR) NULL,
@@ -193,14 +213,17 @@ BOOL uiCreateStatusBar (HWND hwndParent)
         0, 0, 0, 0,
         hwndParent,
         (HMENU)IDC_STATUSBAR,
-        g_hInst,
+        hInstance,
         NULL);
 
-    if (g_hwndStatusBar == NULL) {
+    if (hwndStatusBar == NULL) {
         return FALSE;
     }
 
-    SendMessage(g_hwndStatusBar, SB_SETTEXT, 0, (LPARAM)L"Status bar test.");
+    handles = (struct windowHandles *)GetWindowLongPtr(hwndParent, GWLP_USERDATA);
+    handles->hwndStatusBar = hwndStatusBar;
+
+    SendMessage(hwndStatusBar, SB_SETTEXT, 0, (LPARAM)L"Status bar test.");
 
     return TRUE;
 }
