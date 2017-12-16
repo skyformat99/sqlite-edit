@@ -1,13 +1,7 @@
 //File header here
 
-/* TODO
-    * Create initApplication
-    * Create initInstance
-    * Create openFile
-*/
-
 #define STRICT
-#ifndef UNICODE //correct, wWinMain?
+#ifndef UNICODE
 #define UNICODE
 #endif
 
@@ -31,6 +25,7 @@ BOOL onCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct);
 void onSize(HWND hwnd, UINT state, int cx, int cy);
 void onPaint(HWND hwnd);
 void onCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
+void fileOpen(HWND hwnd);
 BOOL uiCreateStatusBar (HWND hwndParent);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -139,42 +134,44 @@ void onCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         case ID_FILE_NEW:
             break;
 
-        case ID_FILE_OPEN: {
-            OPENFILENAME ofn;
-            char fileName[260];
-            HANDLE fileHandle;
-
-            ZeroMemory(&ofn, sizeof(ofn));
-            ofn.lStructSize     = sizeof(ofn);
-            ofn.hwndOwner       = hwnd;
-            ofn.lpstrFile       = fileName;
-            ofn.lpstrFile[0]    = '\0';
-            ofn.nMaxFile        = sizeof(fileName);
-            ofn.lpstrFilter     = L"Database (*.db)\0*.DB\0All Files (*.*)\0*.*\0";
-            ofn.nFilterIndex    = 1;
-            ofn.lpstrFileTitle  = NULL;
-            ofn.nMaxFileTitle   = 0;
-            ofn.lpstrInitialDir = NULL;
-            ofn.Flags           = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-            if (GetOpenFileName(&ofn) == TRUE) {
-                fileHandle = CreateFile(
-                    ofn.lpstrFile,
-                    GENERIC_READ,
-                    0,
-                    (LPSECURITY_ATTRIBUTES) NULL,
-                    OPEN_EXISTING,
-                    FILE_ATTRIBUTE_NORMAL,
-                    (HANDLE) NULL);
-            }
+        case ID_FILE_OPEN:
+            fileOpen(hwnd);
             break;
-        }
 
         case ID_FILE_EXIT:
             PostMessage(hwnd, WM_CLOSE, 0, 0 );
             break;
+    }
+}
 
-        break;
+void fileOpen(HWND hwnd)
+{
+    OPENFILENAME ofn;
+    char fileName[260];
+    HANDLE fileHandle;
+
+    ZeroMemory(&ofn, sizeof(ofn));
+    ofn.lStructSize     = sizeof(ofn);
+    ofn.hwndOwner       = hwnd;
+    ofn.lpstrFile       = fileName;
+    ofn.lpstrFile[0]    = '\0';
+    ofn.nMaxFile        = sizeof(fileName);
+    ofn.lpstrFilter     = L"Database (*.db)\0*.DB\0All Files (*.*)\0*.*\0";
+    ofn.nFilterIndex    = 1;
+    ofn.lpstrFileTitle  = NULL;
+    ofn.nMaxFileTitle   = 0;
+    ofn.lpstrInitialDir = NULL;
+    ofn.Flags           = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+    if (GetOpenFileName(&ofn) == TRUE) {
+        fileHandle = CreateFile(
+            ofn.lpstrFile,
+            GENERIC_READ,
+            0,
+            (LPSECURITY_ATTRIBUTES) NULL,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            (HANDLE) NULL);
     }
 }
 
