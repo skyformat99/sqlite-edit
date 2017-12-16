@@ -162,8 +162,8 @@ void onCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 void fileOpen(HWND hwnd)
 {
     OPENFILENAME ofn;
-    char fileName[260];
-    HANDLE fileHandle;
+    TCHAR        fileName[MAX_PATH];
+    HANDLE       fileHandle;
 
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize     = sizeof(ofn);
