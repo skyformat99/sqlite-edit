@@ -8,27 +8,11 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
-#include "resource.h"
 #include <sqlite3.h>
+#include "main.h"
+#include "resource.h"
 
 const wchar_t CLASS_NAME[] = L"DBEd";
-
-struct windowHandles {
-    HWND hwndStatusBar;
-};
-
-#define IDC_STATUSBAR 1001
-
-BOOL initApplication(HINSTANCE hinstance);
-BOOL initInstance(HINSTANCE hinstance, int nCmdShow);
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-void onDestroy(HWND hwnd);
-BOOL onCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct);
-void onSize(HWND hwnd, UINT state, int cx, int cy);
-void onPaint(HWND hwnd);
-void onCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
-void fileOpen(HWND hwnd);
-BOOL uiCreateStatusBar (HWND hwndParent);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     PWSTR pCmdLine, int nCmdShow)
