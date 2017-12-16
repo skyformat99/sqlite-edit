@@ -7,7 +7,7 @@
 */
 
 #define STRICT
-#ifndef UNICODE
+#ifndef UNICODE //correct, wWinMain?
 #define UNICODE
 #endif
 
@@ -17,11 +17,14 @@
 #include "resource.h"
 #include <sqlite3.h>
 
+const wchar_t CLASS_NAME[] = L"DBEd";
 HINSTANCE g_hInst;
 HWND g_hwndStatusBar;
 
 #define IDC_STATUSBAR 1001
 
+BOOL initApplication(HINSTANCE hinstance);
+BOOL initInstance(HINSTANCE hinstance, int nCmdShow);
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 void onDestroy(HWND hwnd);
 BOOL onCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct);
@@ -33,17 +36,39 @@ BOOL uiCreateStatusBar (HWND hwndParent);
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     PWSTR pCmdLine, int nCmdShow)
 {
-    const wchar_t CLASS_NAME[] = L"DBEd";
-    WNDCLASS wc = {0}; //Ex version?
+    MSG msg = {0};
 
-    g_hInst = hInstance;
+    if (!initApplication(hInstance)) {
+        return 0;
+    }
+
+    if (!initInstance(hInstance, nCmdShow)) {
+        return 0;
+    }
+
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    return 0;
+}
+
+BOOL initApplication(HINSTANCE hInstance)
+{
+    WNDCLASS wc = {0}; //Ex version?
 
     wc.lpfnWndProc   = WindowProc;
     wc.hInstance     = hInstance;
     wc.lpszClassName = CLASS_NAME;
     wc.lpszMenuName  = MAKEINTRESOURCE(IDR_MENU);
 
-    RegisterClass(&wc); //Ex version?
+    return RegisterClass(&wc); //Ex version?
+}
+
+BOOL initInstance(HINSTANCE hInstance, int nCmdShow)
+{
+    g_hInst = hInstance;
 
     HWND hwnd = CreateWindowEx(
         0,
@@ -59,21 +84,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         hInstance,
         NULL);
 
-    if (hwnd == NULL) {
-        return 0;
+    if (!hwnd) {
+        return FALSE;
     }
 
     ShowWindow(hwnd, nCmdShow);
-    // UpdatWindow(hwnd); ???
+    UpdateWindow(hwnd);
 
-    MSG msg = {0};
-
-    while (GetMessage(&msg, NULL, 0, 0)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-
-    return 0;
+    return TRUE;
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
