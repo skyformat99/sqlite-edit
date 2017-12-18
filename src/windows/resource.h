@@ -4,3 +4,4 @@
 #define ID_FILE_EXIT 2003
 
 #define IDC_STATUSBAR 1001
+#define IDC_TREEVIEW  1002

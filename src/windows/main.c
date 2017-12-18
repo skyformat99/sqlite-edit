@@ -118,6 +118,10 @@ BOOL onCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
         return FALSE;
     }
 
+    if (!uiCreateTreeView(hwnd)) {
+        return FALSE;
+    }
+
     return TRUE;
 }
 
@@ -219,6 +223,47 @@ BOOL uiCreateStatusBar (HWND hwndParent)
     handles->hwndStatusBar = hwndStatusBar;
 
     SendMessage(hwndStatusBar, SB_SETTEXT, 0, (LPARAM)L"Status bar test.");
+
+    return TRUE;
+}
+
+BOOL uiCreateTreeView (HWND hwndParent)
+{
+    INITCOMMONCONTROLSEX iccx;
+    HINSTANCE            hInstance;
+    RECT                 rc;
+    HWND                 hwndTreeView;
+    struct windowHandles *handles;
+    HTREEITEM            treeItem;
+
+    iccx.dwSize = sizeof(INITCOMMONCONTROLSEX);
+    iccx.dwICC = ICC_TREEVIEW_CLASSES;
+    if (!InitCommonControlsEx(&iccx)) {
+        return FALSE;
+    }
+
+    hInstance = GetWindowInstance(hwndParent);
+    GetClientRect(hwndParent, &rc);
+
+    hwndTreeView = CreateWindowEx(
+        0,
+        WC_TREEVIEW,
+        0,
+        TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | WS_CHILD | WS_VISIBLE,
+        rc.left, rc.top, rc.right, rc.bottom,
+        hwndParent,
+        (HMENU)IDC_TREEVIEW,
+        hInstance,
+        0);
+
+    if (hwndTreeView == NULL) {
+        return FALSE;
+    }
+
+    handles = (struct windowHandles *)GetWindowLongPtr(hwndParent, GWLP_USERDATA);
+    handles->hwndTreeView = hwndTreeView;
+
+    //insert item
 
     return TRUE;
 }

@@ -3,6 +3,7 @@
 
 struct windowHandles {
     HWND hwndStatusBar;
+    HWND hwndTreeView;
 };
 
 BOOL initApplication(HINSTANCE hinstance);
@@ -16,5 +17,6 @@ void onPaint(HWND hwnd);
 void onCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 void fileOpen(HWND hwnd);
 BOOL uiCreateStatusBar (HWND hwndParent);
+BOOL uiCreateTreeView (HWND hwndParent);
 
 #endif /* MAIN_H */
