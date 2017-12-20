@@ -50,7 +50,9 @@ BOOL initApplication(HINSTANCE hInstance)
 
 BOOL initInstance(HINSTANCE hInstance, int nCmdShow)
 {
-    HWND hwnd = CreateWindowEx(
+    HWND hwnd;
+
+    hwnd = CreateWindowEx(
         0,
         CLASS_NAME,
         L"DBEd",
@@ -78,7 +80,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg) {
         HANDLE_MSG(hwnd, WM_DESTROY, onDestroy);
-        HANDLE_MSG(hwnd, WM_NCDESTROY, onNCDestroy);
         HANDLE_MSG(hwnd, WM_CREATE, onCreate);
         HANDLE_MSG(hwnd, WM_SIZE, onSize);
         HANDLE_MSG(hwnd, WM_PAINT, onPaint);
@@ -95,25 +96,8 @@ void onDestroy(HWND hwnd)
     PostQuitMessage(0);
 }
 
-void onNCDestroy(HWND hwnd)
-{
-    LONG_PTR handles;
-
-    handles = GetWindowLongPtr(hwnd, GWLP_USERDATA);
-    VirtualFree(handles, 0, MEM_RELEASE);
-    SetWindowLongPtr(hwnd, GWLP_USERDATA, 0);
-}
-
 BOOL onCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 {
-    struct windowHandles *handles;
-
-    handles = VirtualAlloc(NULL, sizeof(struct windowHandles), MEM_COMMIT, PAGE_READWRITE);
-    if (!handles) {
-        return FALSE;
-    }
-    SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)handles);
-
     if (!uiCreateStatusBar(hwnd)) {
         return FALSE;
     }
@@ -127,10 +111,30 @@ BOOL onCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 
 void onSize(HWND hwnd, UINT state, int cx, int cy)
 {
-    struct windowHandles *handles;
+    HWND hwndStatusBar;
+    RECT rcStatusBar;
+    HWND hwndTreeView;
+    RECT rcTreeView;
 
-    handles = (struct windowHandles *)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-    SendMessage(handles->hwndStatusBar, WM_SIZE, 0, 0);
+    hwndStatusBar = GetDlgItem(hwnd, IDC_STATUSBAR);
+    if (hwndStatusBar) {
+        SendMessage(hwndStatusBar, WM_SIZE, 0, 0);
+        GetWindowRect(hwndStatusBar, &rcStatusBar);
+    }
+
+    hwndTreeView = GetDlgItem(hwnd, IDC_TREEVIEW);
+    if (hwndTreeView) {
+        GetClientRect(hwnd, &rcTreeView);
+        rcTreeView.bottom -= rcStatusBar.bottom - rcStatusBar.top;
+        SetWindowPos(
+            hwndTreeView,
+            NULL,
+            rcTreeView.left,
+            rcTreeView.top,
+            rcTreeView.right,
+            rcTreeView.bottom,
+            SWP_NOZORDER);
+    }
 }
 
 void onPaint(HWND hwnd)
@@ -194,7 +198,6 @@ BOOL uiCreateStatusBar (HWND hwndParent)
     INITCOMMONCONTROLSEX iccx;
     HINSTANCE            hInstance;
     HWND                 hwndStatusBar;
-    struct windowHandles *handles;
 
     iccx.dwSize = sizeof(INITCOMMONCONTROLSEX);
     iccx.dwICC = ICC_BAR_CLASSES;
@@ -219,9 +222,6 @@ BOOL uiCreateStatusBar (HWND hwndParent)
         return FALSE;
     }
 
-    handles = (struct windowHandles *)GetWindowLongPtr(hwndParent, GWLP_USERDATA);
-    handles->hwndStatusBar = hwndStatusBar;
-
     SendMessage(hwndStatusBar, SB_SETTEXT, 0, (LPARAM)L"Status bar test.");
 
     return TRUE;
@@ -233,11 +233,10 @@ BOOL uiCreateTreeView (HWND hwndParent)
     HINSTANCE            hInstance;
     RECT                 rc;
     HWND                 hwndTreeView;
-    struct windowHandles *handles;
-    HTREEITEM            treeItem;
+    // HTREEITEM            treeItem;
 
     iccx.dwSize = sizeof(INITCOMMONCONTROLSEX);
-    iccx.dwICC = ICC_TREEVIEW_CLASSES;
+    iccx.dwICC  = ICC_TREEVIEW_CLASSES;
     if (!InitCommonControlsEx(&iccx)) {
         return FALSE;
     }
@@ -249,19 +248,16 @@ BOOL uiCreateTreeView (HWND hwndParent)
         0,
         WC_TREEVIEW,
         0,
-        TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | WS_CHILD | WS_VISIBLE,
+        WS_VISIBLE | WS_CHILD | TVS_HASLINES,
         rc.left, rc.top, rc.right, rc.bottom,
         hwndParent,
         (HMENU)IDC_TREEVIEW,
         hInstance,
-        0);
+        NULL);
 
     if (hwndTreeView == NULL) {
         return FALSE;
     }
-
-    handles = (struct windowHandles *)GetWindowLongPtr(hwndParent, GWLP_USERDATA);
-    handles->hwndTreeView = hwndTreeView;
 
     //insert item
 
