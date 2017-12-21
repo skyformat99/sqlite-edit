@@ -42,6 +42,7 @@ BOOL initApplication(HINSTANCE hInstance)
     wcex.cbSize        = sizeof(WNDCLASSEX);
     wcex.lpfnWndProc   = WindowProc;
     wcex.hInstance     = hInstance;
+    wcex.hIcon         = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPICON));
     wcex.lpszClassName = CLASS_NAME;
     wcex.lpszMenuName  = MAKEINTRESOURCE(IDR_MENU);
 

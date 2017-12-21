@@ -1,5 +1,7 @@
 #include "resource.h"
 
+IDI_APPICON ICON "..\\..\\res\\sqlite-edit.ico"
+
 IDR_MENU MENU
 BEGIN
     POPUP "&File"
