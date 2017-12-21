@@ -22,7 +22,7 @@
     <ClCompile Include="..\..\src\windows\main.c" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\..\src\windows\dbed.rc" />
+    <ResourceCompile Include="..\..\src\windows\sqlite-edit.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\windows\resource.h" />
@@ -31,8 +31,9 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{EC15FB76-C911-4304-BF0E-EA13007E34EB}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>dbed</RootNamespace>
+    <RootNamespace>sqlite-edit</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <ProjectName>sqlite-edit</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

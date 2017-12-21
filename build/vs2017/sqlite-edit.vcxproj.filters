@@ -20,7 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\..\src\windows\dbed.rc">
+    <ResourceCompile Include="..\..\src\windows\sqlite-edit.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
