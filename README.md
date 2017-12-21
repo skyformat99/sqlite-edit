@@ -1,3 +1,5 @@
+![SQLite Edit Logo](/img/sqlite-edit.png)
+
 # SQLite Edit: A lightweight SQLite editor.
 
 ## Compile (Windows VS2017)
