@@ -1,4 +1,4 @@
-# DBEd: Database Editor
+# SQLite Edit: A lightweight SQLite editor.
 
 ## Compile (Windows VS2017)
 
@@ -15,4 +15,4 @@
 5. From "Developer Command Prompt for VS 2017" run LIB /DEF:sqlite3.def in lib\sqlite3\x64
 
 ### Build
-Run build\vs2017\dbed.sln and build.
+Run build\vs2017\sqlite-edit.sln and build.

@@ -12,7 +12,7 @@
 #include "main.h"
 #include "resource.h"
 
-const wchar_t CLASS_NAME[] = L"sqlite-edit";
+const wchar_t CLASS_NAME[] = L"SqliteEdit";
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     PWSTR pCmdLine, int nCmdShow)
@@ -56,7 +56,7 @@ BOOL initInstance(HINSTANCE hInstance, int nCmdShow)
     hwnd = CreateWindowEx(
         0,
         CLASS_NAME,
-        L"sqlite-edit",
+        L"SQLite Edit",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
