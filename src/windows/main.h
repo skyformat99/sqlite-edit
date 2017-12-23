@@ -1,7 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-enum treeViewItemType {
+enum treeViewImage {
     database,
     table
 };

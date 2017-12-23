@@ -320,7 +320,7 @@ BOOL treeViewCreateImageList (HINSTANCE hInstance, HWND hwndTreeView)
 }
 
 HTREEITEM treeViewInsert (HWND hwndTreeView, HTREEITEM parentTreeItem,
-    LPTSTR pszText, enum treeViewItemType type)
+    LPTSTR pszText, enum treeViewImage image)
 {
     TVITEM         treeViewItem   = {0};
     TVINSERTSTRUCT treeViewInsert = {0};
@@ -328,16 +328,8 @@ HTREEITEM treeViewInsert (HWND hwndTreeView, HTREEITEM parentTreeItem,
     treeViewItem.mask           = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
     treeViewItem.pszText        = pszText;
     treeViewItem.cchTextMax     = wcslen(pszText);
-    switch (type) {
-        case database:
-            treeViewItem.iImage         = database;
-            treeViewItem.iSelectedImage = database;
-            break;
-        case table:
-            treeViewItem.iImage         = table;
-            treeViewItem.iSelectedImage = table;
-            break;
-    }
+    treeViewItem.iImage         = image;
+    treeViewItem.iSelectedImage = image;
 
     treeViewInsert.hParent      = parentTreeItem;
     treeViewInsert.hInsertAfter = TVI_SORT;
