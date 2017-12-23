@@ -84,11 +84,12 @@ BOOL initInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg) {
-        HANDLE_MSG(hwnd, WM_DESTROY, onDestroy);
         HANDLE_MSG(hwnd, WM_CREATE, onCreate);
         HANDLE_MSG(hwnd, WM_SIZE, onSize);
         HANDLE_MSG(hwnd, WM_PAINT, onPaint);
         HANDLE_MSG(hwnd, WM_COMMAND, onCommand);
+        HANDLE_MSG(hwnd, WM_CLOSE, onClose);
+        HANDLE_MSG(hwnd, WM_DESTROY, onDestroy);
         default:
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
@@ -96,7 +97,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-void onDestroy(HWND hwnd)
+void onClose(HWND hwnd)
 {
     HWND       hwndTreeView;
     HIMAGELIST treeViewImageList;
@@ -105,6 +106,11 @@ void onDestroy(HWND hwnd)
     treeViewImageList = TreeView_GetImageList(hwndTreeView, TVSIL_NORMAL);
     ImageList_Destroy(treeViewImageList);
 
+    DestroyWindow(hwnd);
+}
+
+void onDestroy(HWND hwnd)
+{
     PostQuitMessage(0);
 }
 

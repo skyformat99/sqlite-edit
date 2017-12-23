@@ -9,6 +9,7 @@ enum treeViewItemType {
 BOOL initApplication(HINSTANCE hinstance);
 BOOL initInstance(HINSTANCE hinstance, int nCmdShow);
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+void onClose(HWND hwnd);
 void onDestroy(HWND hwnd);
 BOOL onCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct);
 void onSize(HWND hwnd, UINT state, int cx, int cy);
