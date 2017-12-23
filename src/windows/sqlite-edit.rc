@@ -2,6 +2,9 @@
 
 IDI_APPICON ICON "..\\..\\res\\sqlite-edit.ico"
 
+IDB_DATABASE BITMAP "..\\..\\res\\database.bmp"
+IDB_TABLE BITMAP "..\\..\\res\\table.bmp"
+
 IDR_MENU MENU
 BEGIN
     POPUP "&File"

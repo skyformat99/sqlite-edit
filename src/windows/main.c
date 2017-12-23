@@ -5,6 +5,10 @@
 #define UNICODE
 #endif
 
+#pragma comment(linker,"\"/manifestdependency:type='win32' \
+name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
@@ -94,6 +98,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void onDestroy(HWND hwnd)
 {
+    HWND       hwndTreeView;
+    HIMAGELIST treeViewImageList;
+
+    hwndTreeView = GetDlgItem(hwnd, IDC_TREEVIEW);
+    treeViewImageList = TreeView_GetImageList(hwndTreeView, TVSIL_NORMAL);
+    ImageList_Destroy(treeViewImageList);
+
     PostQuitMessage(0);
 }
 
@@ -234,7 +245,6 @@ BOOL uiCreateTreeView (HWND hwndParent)
     HINSTANCE            hInstance;
     RECT                 rc;
     HWND                 hwndTreeView;
-    // HTREEITEM            treeItem;
 
     iccx.dwSize = sizeof(INITCOMMONCONTROLSEX);
     iccx.dwICC  = ICC_TREEVIEW_CLASSES;
@@ -249,7 +259,7 @@ BOOL uiCreateTreeView (HWND hwndParent)
         0,
         WC_TREEVIEW,
         0,
-        WS_VISIBLE | WS_CHILD | TVS_HASLINES,
+        WS_VISIBLE | WS_CHILD | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS,
         rc.left, rc.top, rc.right, rc.bottom,
         hwndParent,
         (HMENU)IDC_TREEVIEW,
@@ -260,7 +270,72 @@ BOOL uiCreateTreeView (HWND hwndParent)
         return FALSE;
     }
 
-    //insert item
+    if (!treeViewCreateImageList(hInstance, hwndTreeView)) {
+        DestroyWindow(hwndTreeView);
+        return FALSE;
+    }
+
+    HTREEITEM databaseTreeItem;
+    databaseTreeItem = treeViewInsert(hwndTreeView, TVI_ROOT, L"Database Name", database);
+    treeViewInsert(hwndTreeView, databaseTreeItem, L"A Table", table);
+    treeViewInsert(hwndTreeView, databaseTreeItem, L"Another Table", table);
 
     return TRUE;
+}
+
+BOOL treeViewCreateImageList (HINSTANCE hInstance, HWND hwndTreeView)
+{
+    HIMAGELIST imageList;
+    HBITMAP    bitmap;
+    int        numImages = 2;
+
+    imageList = ImageList_Create(
+        GetSystemMetrics(SM_CXSMICON),
+        GetSystemMetrics(SM_CXSMICON),
+        ILC_COLOR32,
+        numImages,
+        0);
+
+    bitmap = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_DATABASE));
+    ImageList_Add(imageList, bitmap, (HBITMAP)NULL);
+    DeleteObject(bitmap);
+
+    bitmap = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_TABLE));
+    ImageList_Add(imageList, bitmap, (HBITMAP)NULL);
+    DeleteObject(bitmap);
+
+    if(ImageList_GetImageCount(imageList) < numImages) {
+        return FALSE;
+    }
+
+    TreeView_SetImageList(hwndTreeView, imageList, TVSIL_NORMAL);
+
+    return TRUE;
+}
+
+HTREEITEM treeViewInsert (HWND hwndTreeView, HTREEITEM parentTreeItem,
+    LPTSTR pszText, enum treeViewItemType type)
+{
+    TVITEM         treeViewItem   = {0};
+    TVINSERTSTRUCT treeViewInsert = {0};
+
+    treeViewItem.mask           = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
+    treeViewItem.pszText        = pszText;
+    treeViewItem.cchTextMax     = wcslen(pszText);
+    switch (type) {
+        case database:
+            treeViewItem.iImage         = database;
+            treeViewItem.iSelectedImage = database;
+            break;
+        case table:
+            treeViewItem.iImage         = table;
+            treeViewItem.iSelectedImage = table;
+            break;
+    }
+
+    treeViewInsert.hParent      = parentTreeItem;
+    treeViewInsert.hInsertAfter = TVI_SORT;
+    treeViewInsert.item         = treeViewItem;
+
+    return TreeView_InsertItem(hwndTreeView, &treeViewInsert);
 }
