@@ -265,7 +265,8 @@ BOOL uiCreateTreeView (HWND hwndParent)
         0,
         WC_TREEVIEW,
         0,
-        WS_VISIBLE | WS_CHILD | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS,
+        WS_VISIBLE | WS_CHILD | WS_HSCROLL | WS_VSCROLL | TVS_HASLINES |
+            TVS_LINESATROOT | TVS_HASBUTTONS,
         rc.left, rc.top, rc.right, rc.bottom,
         hwndParent,
         (HMENU)IDC_TREEVIEW,
