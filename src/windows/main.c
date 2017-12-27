@@ -379,40 +379,46 @@ BOOL uiCreateListView (HWND hwndParent)
         0,
         LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_LABELTIP);
 
-    LVCOLUMN listViewColumn = {0};
-    listViewColumn.mask       = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
-    listViewColumn.pszText    = TEXT("Column Name 1");
-    listViewColumn.cx         = 100;
-    listViewColumn.iSubItem   = 0;
-    listViewColumn.cchTextMax = 256;
-    if (ListView_InsertColumn(hwndListView, 0, &listViewColumn) == -1) {
+    if (listViewInsertColumn(hwndListView, 0, L"Column Name 1") == -1) {
         return FALSE;
     }
-    listViewColumn.pszText  = TEXT("Column Name 2");
-    if (ListView_InsertColumn(hwndListView, 1, &listViewColumn) == -1) {
+    if (listViewInsertColumn(hwndListView, 1, L"Column Name 2") == -1) {
         return FALSE;
     }
 
-    LVITEM listViewItem = {0};
-    listViewItem.mask       = LVIF_TEXT;
-    listViewItem.pszText    = TEXT("Test Item 1");
-    listViewItem.iSubItem   = 0;
-    listViewItem.iItem      = 0;
-    listViewItem.cchTextMax = 256;
-    if (ListView_InsertItem(hwndListView, &listViewItem) == -1) {
-        return FALSE;
-    }
-    listViewItem.pszText    = TEXT("Sub Item 1");
-    listViewItem.iSubItem   = 1;
-    listViewItem.iItem      = 0;
-    ListView_SetItem(hwndListView, &listViewItem);
-    listViewItem.pszText    = TEXT("Test Item 2");
-    listViewItem.iSubItem   = 0;
-    listViewItem.iItem      = 1;
-    if (ListView_InsertItem(hwndListView, &listViewItem) == -1) {
-        return FALSE;
-    }
-    ListView_SetItemText(hwndListView, 1, 1, L"Sub Item 2");
+    // LVITEM listViewItem = {0};
+    // listViewItem.mask       = LVIF_TEXT;
+    // listViewItem.pszText    = TEXT("Test Item 1");
+    // listViewItem.iSubItem   = 0;
+    // listViewItem.iItem      = 0;
+    // listViewItem.cchTextMax = 256;
+    // if (ListView_InsertItem(hwndListView, &listViewItem) == -1) {
+    //     return FALSE;
+    // }
+    // listViewItem.pszText    = TEXT("Sub Item 1");
+    // listViewItem.iSubItem   = 1;
+    // listViewItem.iItem      = 0;
+    // ListView_SetItem(hwndListView, &listViewItem);
+    // listViewItem.pszText    = TEXT("Test Item 2");
+    // listViewItem.iSubItem   = 0;
+    // listViewItem.iItem      = 1;
+    // if (ListView_InsertItem(hwndListView, &listViewItem) == -1) {
+    //     return FALSE;
+    // }
+    // ListView_SetItemText(hwndListView, 1, 1, L"Sub Item 2");
 
     return TRUE;
+}
+
+int listViewInsertColumn(HWND listView, int columnIndex, LPTSTR columnName)
+{
+    LVCOLUMN listViewColumn = {0};
+
+    listViewColumn.mask       = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
+    listViewColumn.cx         = 100;
+    listViewColumn.pszText    = columnName;
+    listViewColumn.cchTextMax = sizeof(columnName)/sizeof(columnName[0]);
+    listViewColumn.iSubItem   = columnIndex;
+
+    return ListView_InsertColumn(listView, columnIndex, &listViewColumn);
 }
