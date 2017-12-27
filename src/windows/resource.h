@@ -10,3 +10,4 @@
 
 #define IDC_STATUSBAR 1001
 #define IDC_TREEVIEW  1002
+#define IDC_LISTVIEW  1003

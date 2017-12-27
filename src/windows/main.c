@@ -124,6 +124,10 @@ BOOL onCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
         return FALSE;
     }
 
+    if (!uiCreateListView(hwnd)) {
+        return FALSE;
+    }
+
     return TRUE;
 }
 
@@ -328,7 +332,7 @@ HTREEITEM treeViewInsert (HWND hwndTreeView, HTREEITEM parentTreeItem,
 
     treeViewItem.mask           = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
     treeViewItem.pszText        = pszText;
-    treeViewItem.cchTextMax     = wcslen(pszText);
+    treeViewItem.cchTextMax     = sizeof(pszText)/sizeof(pszText[0]);
     treeViewItem.iImage         = image;
     treeViewItem.iSelectedImage = image;
 
@@ -337,4 +341,78 @@ HTREEITEM treeViewInsert (HWND hwndTreeView, HTREEITEM parentTreeItem,
     treeViewInsert.item         = treeViewItem;
 
     return TreeView_InsertItem(hwndTreeView, &treeViewInsert);
+}
+
+BOOL uiCreateListView (HWND hwndParent)
+{
+    INITCOMMONCONTROLSEX iccx;
+    HINSTANCE            hInstance;
+    RECT                 rc;
+    HWND                 hwndListView;
+
+    iccx.dwSize = sizeof(INITCOMMONCONTROLSEX);
+    iccx.dwICC  = ICC_LISTVIEW_CLASSES;
+    if (!InitCommonControlsEx(&iccx)) {
+        return FALSE;
+    }
+
+    hInstance = GetWindowInstance(hwndParent);
+    GetClientRect(hwndParent, &rc);
+
+    hwndListView = CreateWindowEx(
+        0,
+        WC_LISTVIEW,
+        0,
+        WS_VISIBLE | WS_CHILD | WS_HSCROLL | WS_VSCROLL | LVS_REPORT,
+        rc.left, rc.top, rc.right, rc.bottom,
+        hwndParent,
+        (HMENU)IDC_LISTVIEW,
+        hInstance,
+        NULL);
+
+    if (hwndListView == NULL) {
+        return FALSE;
+    }
+
+    ListView_SetExtendedListViewStyleEx (
+        hwndListView,
+        0,
+        LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_LABELTIP);
+
+    LVCOLUMN listViewColumn = {0};
+    listViewColumn.mask       = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
+    listViewColumn.pszText    = TEXT("Column Name 1");
+    listViewColumn.cx         = 100;
+    listViewColumn.iSubItem   = 0;
+    listViewColumn.cchTextMax = 256;
+    if (ListView_InsertColumn(hwndListView, 0, &listViewColumn) == -1) {
+        return FALSE;
+    }
+    listViewColumn.pszText  = TEXT("Column Name 2");
+    if (ListView_InsertColumn(hwndListView, 1, &listViewColumn) == -1) {
+        return FALSE;
+    }
+
+    LVITEM listViewItem = {0};
+    listViewItem.mask       = LVIF_TEXT;
+    listViewItem.pszText    = TEXT("Test Item 1");
+    listViewItem.iSubItem   = 0;
+    listViewItem.iItem      = 0;
+    listViewItem.cchTextMax = 256;
+    if (ListView_InsertItem(hwndListView, &listViewItem) == -1) {
+        return FALSE;
+    }
+    listViewItem.pszText    = TEXT("Sub Item 1");
+    listViewItem.iSubItem   = 1;
+    listViewItem.iItem      = 0;
+    ListView_SetItem(hwndListView, &listViewItem);
+    listViewItem.pszText    = TEXT("Test Item 2");
+    listViewItem.iSubItem   = 0;
+    listViewItem.iItem      = 1;
+    if (ListView_InsertItem(hwndListView, &listViewItem) == -1) {
+        return FALSE;
+    }
+    ListView_SetItemText(hwndListView, 1, 1, L"Sub Item 2");
+
+    return TRUE;
 }
