@@ -22,5 +22,6 @@ BOOL treeViewCreateImageList (HINSTANCE hInstance, HWND hwndTreeView);
 HTREEITEM treeViewInsert (HWND hwndTreeView, HTREEITEM parentTreeItem, LPTSTR pszText, enum treeViewItemType type);
 BOOL uiCreateListView (HWND hwndParent);
 int listViewInsertColumn(HWND listView, int columnIndex, LPTSTR columnName);
+int listViewInsertItem(HWND listView, int itemIndex, LPTSTR itemName, int numSumItems, LPTSTR subItemNames[]);
 
 #endif /* MAIN_H */

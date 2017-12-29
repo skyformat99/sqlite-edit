@@ -386,26 +386,14 @@ BOOL uiCreateListView (HWND hwndParent)
         return FALSE;
     }
 
-    // LVITEM listViewItem = {0};
-    // listViewItem.mask       = LVIF_TEXT;
-    // listViewItem.pszText    = TEXT("Test Item 1");
-    // listViewItem.iSubItem   = 0;
-    // listViewItem.iItem      = 0;
-    // listViewItem.cchTextMax = 256;
-    // if (ListView_InsertItem(hwndListView, &listViewItem) == -1) {
-    //     return FALSE;
-    // }
-    // listViewItem.pszText    = TEXT("Sub Item 1");
-    // listViewItem.iSubItem   = 1;
-    // listViewItem.iItem      = 0;
-    // ListView_SetItem(hwndListView, &listViewItem);
-    // listViewItem.pszText    = TEXT("Test Item 2");
-    // listViewItem.iSubItem   = 0;
-    // listViewItem.iItem      = 1;
-    // if (ListView_InsertItem(hwndListView, &listViewItem) == -1) {
-    //     return FALSE;
-    // }
-    // ListView_SetItemText(hwndListView, 1, 1, L"Sub Item 2");
+    LPTSTR subItemNames1[] = {L"Sub Item 1"};
+    if (listViewInsertItem(hwndListView, 0, L"Test Item 1", 1, subItemNames1) == -1) {
+        return FALSE;
+    }
+    LPTSTR subItemNames2[] = {L"Sub Item 2"};
+    if (listViewInsertItem(hwndListView, 1, L"Test Item 2", 1, subItemNames2) == -1) {
+        return FALSE;
+    }
 
     return TRUE;
 }
@@ -421,4 +409,33 @@ int listViewInsertColumn(HWND listView, int columnIndex, LPTSTR columnName)
     listViewColumn.iSubItem   = columnIndex;
 
     return ListView_InsertColumn(listView, columnIndex, &listViewColumn);
+}
+
+int listViewInsertItem(HWND listView, int itemIndex, LPTSTR itemName, int numSumItems, LPTSTR subItemNames[])
+{
+    LVITEM listViewItem = {0};
+    int actualItemIndex;
+
+    listViewItem.mask       = LVIF_TEXT;
+    listViewItem.iItem      = itemIndex;
+    listViewItem.iSubItem   = 0;
+    listViewItem.pszText    = itemName;
+    listViewItem.cchTextMax = sizeof(itemName)/sizeof(itemName[0]);
+
+    actualItemIndex = ListView_InsertItem(listView, &listViewItem);
+    if (actualItemIndex == -1) {
+        return -1;
+    }
+
+    for (int i = 0; i < numSumItems; i++) {
+        listViewItem.iItem      = itemIndex;
+        listViewItem.iSubItem   = i + 1;
+        listViewItem.pszText    = subItemNames[i];
+
+        if (!ListView_SetItem(listView, &listViewItem)) {
+            return -1;
+        }
+    }
+
+    return actualItemIndex;
 }
